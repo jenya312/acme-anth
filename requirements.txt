@@ -1,5 +1,5 @@
 numpy==2.0.2
-anthropic==0.2.7
+anthropic==0.8.1
 pandas==2.2.3
 snowflake-connector-python==3.12.4
 streamlit==1.41.1
