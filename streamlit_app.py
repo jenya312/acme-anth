@@ -51,11 +51,13 @@ except Exception as e:
 # Function to get Anthropic response
 def get_anthropic_response(prompt):
     try:
-        response = anthropic_client.completions.create(
+        response = anthropic_client.messages.create(
             model="claude-v1",
-            prompt=f"\n\nHuman: {prompt}\n\nAssistant:",
-            max_tokens_to_sample=500,
-            stop_sequences=["\n\nHuman:"]
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant analyzing tabular data."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens_to_sample=500
         )
         return response.get('completion', '').strip()
     except Exception as e:
