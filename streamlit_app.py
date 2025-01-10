@@ -3,24 +3,43 @@ import snowflake.connector
 from anthropic import Anthropic
 import pandas as pd
 
-# Load secrets from Streamlit's built-in secrets manager
-snowflake_config = st.secrets["snowflake"]
-anthropic_api_key = st.secrets["anthropic"]["api_key"]
+# Pull the API key from Streamlit's secrets
+anthropic_api_key = st.secrets["ANTHROPIC_API_KEY"]
+
+# Initialize the Anthropic client
+client = Anthropic(api_key=anthropic_api_key)
+
+# Function to interact with Anthropic's Claude model
+def generate_response(prompt):
+    try:
+        response = client.messages.create(
+            model="claude-3-sonnet-20240229",
+            max_tokens=1000,
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+        return response.content[0].text
+    except Exception as e:
+        st.error(f"Error generating response: {e}")
+        return None
 
 # Snowflake connection
 def create_snowflake_connection():
     try:
+        snowflake_config = st.secrets["snowflake"]
         return snowflake.connector.connect(
             account=snowflake_config["account"],
             user=snowflake_config["user"],
             password=snowflake_config["password"],
             warehouse=snowflake_config["warehouse"],
-            database="ACQ4",
-            schema="PUBLIC"
+            database="ACQ4",  # Explicitly specify the ACQ4 database
+            schema="PUBLIC"  # Explicitly specify the PUBLIC schema
         )
     except Exception as e:
         st.error(f"Error connecting to Snowflake: {e}")
         return None
+
 
 # Function to query Snowflake
 def query_snowflake(query):
@@ -39,27 +58,6 @@ def query_snowflake(query):
         st.error(f"Error querying Snowflake: {e}")
         return None
 
-# Anthropic setup
-try:
-    anthropic_client = Anthropic(api_key=anthropic_api_key)
-except Exception as e:
-    st.error(f"Error initializing Anthropic client: {e}")
-
-# Function to get Anthropic response
-def get_anthropic_response(prompt):
-    try:
-        response = anthropic_client.messages.create(
-            model="claude-3-sonnet-20240229",
-            max_tokens=500,
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant analyzing tabular data."},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        return response.content[0].text
-    except Exception as e:
-        st.error(f"Error getting response from Anthropic: {e}")
-        return None
 
 # Streamlit app
 st.title('Data Analysis with Snowflake and Claude')
@@ -122,7 +120,7 @@ if st.button('Get Answer'):
         prompt = f"The following table shows the entire dataset:\n\n{full_data}\n\nQuestion: {question}\n\nAnswer:"
 
         # Get answer from Anthropic
-        answer = get_anthropic_response(prompt)
+        answer = generate_response(prompt)
         if answer:
             st.write("Answer:")
             st.write(answer)
