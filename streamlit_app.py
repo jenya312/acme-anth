@@ -1,6 +1,6 @@
 import streamlit as st
 import snowflake.connector
-from anthropic import Anthropic
+from anthropic import Client  # Correct import
 import pandas as pd
 
 # Load secrets from Streamlit's built-in secrets manager
@@ -43,7 +43,7 @@ def query_snowflake(query):
 
 # Anthropic setup
 try:
-    anthropic_client = Anthropic(api_key=anthropic_api_key)
+    anthropic_client = Client(api_key=anthropic_api_key)
 except Exception as e:
     st.error(f"Error initializing Anthropic client: {e}")
 
@@ -57,7 +57,7 @@ def get_anthropic_response(prompt):
             max_tokens_to_sample=500,
             stop_sequences=["\n\nHuman:"]
         )
-        return response.completion.strip()
+        return response.get('completion', '').strip()
     except Exception as e:
         st.error(f"Error getting response from Anthropic: {e}")
         return None
