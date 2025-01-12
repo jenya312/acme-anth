@@ -4,7 +4,7 @@ from anthropic import Anthropic
 import pandas as pd
 
 # Pull the API key from Streamlit's secrets
-anthropic_api_key = st.secrets["ANTHROPIC_API_KEY"]
+anthropic_api_key = st.secrets["api_key"]
 
 # Initialize the Anthropic client
 client = Anthropic(api_key=anthropic_api_key)
