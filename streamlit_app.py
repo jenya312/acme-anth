@@ -1,13 +1,13 @@
 import streamlit as st
 import snowflake.connector
-from anthropic import Anthropic
+import anthropic
 import pandas as pd
 
 # Pull the API key from Streamlit's secrets
 anthropic_api_key = st.secrets["ANTHROPIC_API_KEY"]
 
 # Initialize the Anthropic client
-client = Anthropic(api_key=anthropic_api_key)
+client = anthropic.Anthropic(api_key=anthropic_api_key)
 
 # Function to interact with Anthropic's Claude model
 def generate_response(prompt):
